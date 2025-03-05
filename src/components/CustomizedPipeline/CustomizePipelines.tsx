@@ -17,7 +17,6 @@ import {
 import { Tbody, Thead, Th, Tr, Td, Table /* data-codemods */ } from '@patternfly/react-table';
 import sendIconUrl from '../../assets/send.svg';
 import successIconUrl from '../../assets/success.svg';
-import { useApplicationPipelineGitHubApp } from '../../hooks/useApplicationPipelineGitHubApp';
 import { useKonfluxPublicInfo } from '../../hooks/useKonfluxPublicInfo';
 import { PACState } from '../../hooks/usePACState';
 import { ComponentModel } from '../../models';
@@ -45,7 +44,8 @@ const Row: React.FC<
 > = ({ component, onStateChange }) => {
   const { workspace } = useWorkspaceInfo();
   const track = useTrackEvent();
-  const { url: githubAppURL } = useApplicationPipelineGitHubApp();
+  const [konfluxInfo] = useKonfluxPublicInfo();
+  const applicationUrl = konfluxInfo?.integrations?.github?.application_url || '';
   const [pacState, setPacState] = React.useState<PACState>(PACState.loading);
   const onComponentStateChange = React.useCallback(
     (state: PACState) => {
@@ -219,7 +219,7 @@ const Row: React.FC<
               actionLinks={
                 <>
                   <ExternalLink
-                    href={githubAppURL}
+                    href={applicationUrl}
                     analytics={{
                       link_name: 'install-github-app',
                       link_location: 'manage-builds-pipelines',
