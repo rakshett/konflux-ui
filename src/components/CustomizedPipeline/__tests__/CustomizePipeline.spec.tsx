@@ -161,17 +161,20 @@ describe('CustomizePipeline', () => {
     expect(message).toBeInTheDocument();
   });
 
-  it('should render install Git app alert', () => {
-    usePipelineRunsMock.mockReturnValue([[{}], true]);
-    const result = render(
+  it('should render install Git app alert when there is an error', () => {
+    usePipelineRunsMock.mockReturnValue([
+      [{ pac: { 'error-message': 'GitHub Application is not installed in user repository' } }],
+      true,
+    ]);
+    render(
       <CustomizePipeline
         components={[createComponent('error')]}
         onClose={() => {}}
         modalProps={{ isOpen: true }}
       />,
     );
-    const link = result.getByRole('link', { name: /Install Git Application/ });
-    expect(link).toBeInTheDocument();
+    const errorMessage = screen.getByText('Pull request failed to reach its destination');
+    expect(errorMessage).toBeInTheDocument();
   });
 
   it('should display upgrade status message', () => {
