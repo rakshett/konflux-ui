@@ -5,7 +5,3 @@ export type ResourceStatusCondition = {
   message: string;
   lastTransitionTime?: string;
 };
-
-export type WorkspaceInfoProps = {
-  namespace: string;
-};

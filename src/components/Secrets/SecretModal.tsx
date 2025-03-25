@@ -2,12 +2,7 @@ import * as React from 'react';
 import { Button, Modal, ModalBoxBody, ModalVariant } from '@patternfly/react-core';
 import { Formik } from 'formik';
 import { isEmpty } from 'lodash-es';
-import {
-  ImportSecret,
-  SecretTypeDropdownLabel,
-  SourceSecretType,
-  BuildTimeSecret,
-} from '../../types';
+import { ImportSecret, SecretTypeDropdownLabel, SourceSecretType, BuildTimeSecret } from '../../types';
 import { SecretFromSchema } from '../../utils/validation-utils';
 import { RawComponentProps } from '../modal/createModalLauncher';
 import SecretForm from './SecretForm';
