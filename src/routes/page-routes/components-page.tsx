@@ -2,6 +2,7 @@ import { RouteErrorBoundry } from '@routes/RouteErrorBoundary';
 import {
   ComponentDetailsTab,
   ComponentDetailsViewLayout,
+  ComponentVersionsTab,
   componentDetailsViewLoader,
 } from '../../components/ComponentsPage/ComponentDetails';
 import { COMPONENT_DETAILS_V2_PATH, COMPONENTS_PATH } from '../paths';
@@ -30,8 +31,8 @@ const componentsPageRoutes = [
         element: null, // TODO: implement Activity tab https://issues.redhat.com/browse/KFLUXUI-1006
       },
       {
-        path: `versions`,
-        element: null, // TODO: implement Versions tab https://issues.redhat.com/browse/KFLUXUI-1007
+        path: 'versions',
+        element: <ComponentVersionsTab />,
       },
     ],
   },

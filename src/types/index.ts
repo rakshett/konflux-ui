@@ -3,6 +3,7 @@ export * from './commit';
 export * from './common-types';
 export * from './component';
 export * from './component-detection-query';
+export * from './component-version';
 export * from './coreTekton';
 export * from './enterprise-contract.-policy';
 export * from './pipeline';

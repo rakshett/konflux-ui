@@ -66,6 +66,6 @@ describe('Components page routes configuration', () => {
     expect(activityRoute.element).toBeNull();
 
     expect(versionsRoute.path).toBe('versions');
-    expect(versionsRoute.element).toBeNull();
+    expect(versionsRoute.element).not.toBeNull();
   });
 });
