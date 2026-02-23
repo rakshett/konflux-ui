@@ -21,6 +21,39 @@ export type ComponentSource = {
     revision?: string;
     context?: string;
   };
+  versions?: ComponentVersion[];
+};
+
+export type ComponentVersion = {
+  name: string;
+  revision: string;
+  context?: string;
+  'skip-builds'?: boolean;
+  'build-pipeline'?: ComponentBuildPipeline;
+  dockerfileUri?: string;
+};
+
+export type PipelineSpecFromBundle = {
+  bundle: string;
+  name: string;
+};
+
+export type PipelineRefGit = {
+  pathInRepo: string;
+  revision: string;
+  url: string;
+};
+
+export type PipelineDefinition = {
+  'pipelineref-by-git-resolver'?: PipelineRefGit;
+  'pipelineref-by-name'?: string;
+  'pipelinespec-from-bundle'?: PipelineSpecFromBundle;
+};
+
+export type ComponentBuildPipeline = {
+  'pull-and-push'?: PipelineDefinition;
+  pull?: PipelineDefinition;
+  push?: PipelineDefinition;
 };
 
 export enum NudgeStats {
@@ -46,6 +79,7 @@ export type ComponentSpecs = {
     name: string;
     value: string;
   }[];
+  'default-build-pipeline'?: ComponentBuildPipeline;
 };
 
 export type ComponentKind = K8sResourceCommon & {

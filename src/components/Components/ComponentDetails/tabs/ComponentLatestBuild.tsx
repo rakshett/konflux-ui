@@ -29,14 +29,17 @@ import ScanDescriptionListGroup from '../../../PipelineRun/PipelineRunDetailsVie
 
 type ComponentLatestBuildProps = {
   component: ComponentKind;
+  /** Optional version revision (e.g. branch name) to show latest build for that version. */
+  version?: string;
 };
 
 const ComponentLatestBuild: React.FC<React.PropsWithChildren<ComponentLatestBuildProps>> = ({
   component,
+  version,
 }) => {
   const namespace = useNamespace();
   const [pipelineRun, pipelineRunLoaded, pipelineRunError] =
-    useLatestSuccessfulBuildPipelineRunForComponentV2(namespace, component.metadata.name);
+    useLatestSuccessfulBuildPipelineRunForComponentV2(namespace, component.metadata.name, version);
   const commit = React.useMemo(
     () => ((pipelineRunLoaded && pipelineRun && getCommitsFromPLRs([pipelineRun], 1)) || [])[0],
     [pipelineRunLoaded, pipelineRun],

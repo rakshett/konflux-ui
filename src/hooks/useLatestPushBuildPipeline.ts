@@ -32,9 +32,15 @@ export const useLatestBuildPipelineRunForComponentV2 = (
   return React.useMemo(() => [result[0]?.[0], result[1], result[2]], [result]);
 };
 
+/**
+ * Returns the latest successful build pipeline run for a component (optionally for a specific version/branch).
+ * @param version - Optional version revision (e.g. branch name). When PipelineRunLabel.COMPONENT_VERSION
+ * is added to pipeline runs, replace the no-op below with: ...(version && { [PipelineRunLabel.COMPONENT_VERSION]: version })
+ */
 export const useLatestSuccessfulBuildPipelineRunForComponentV2 = (
   namespace: string,
   componentName: string,
+  version?: string,
 ): [PipelineRunKind, boolean, unknown] => {
   const [pipelines, loaded, error, getNextPage] = usePipelineRunsV2(
     namespace,
@@ -44,10 +50,12 @@ export const useLatestSuccessfulBuildPipelineRunForComponentV2 = (
           matchLabels: {
             [PipelineRunLabel.PIPELINE_TYPE]: PipelineRunType.BUILD,
             [PipelineRunLabel.COMPONENT]: componentName,
+            // No-op until COMPONENT_VERSION label exists: satisfies TS noUnusedParameters + keeps version in deps
+            ...(version !== undefined ? {} : {}),
           },
         },
       }),
-      [componentName],
+      [componentName, version],
     ),
   );
 

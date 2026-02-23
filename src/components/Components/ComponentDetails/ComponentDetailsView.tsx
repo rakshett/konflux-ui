@@ -144,6 +144,10 @@ const ComponentDetailsView: React.FC = () => {
             key: 'activity',
             label: 'Activity',
           },
+          {
+            key: 'versions',
+            label: 'Versions',
+          },
         ]}
       />
     </>

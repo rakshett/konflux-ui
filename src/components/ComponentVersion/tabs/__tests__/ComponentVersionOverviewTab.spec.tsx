@@ -1,0 +1,191 @@
+import { useParams } from 'react-router-dom';
+import { screen } from '@testing-library/react';
+import { useComponent } from '~/hooks/useComponents';
+import { ComponentKind, ComponentSpecs } from '~/types';
+import { renderWithQueryClientAndRouter, mockUseNamespaceHook } from '~/unit-test-utils';
+import ComponentVersionOverviewTab from '../ComponentVersionOverviewTab';
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useParams: jest.fn(),
+}));
+
+jest.mock('~/hooks/useComponents', () => ({
+  useComponent: jest.fn(),
+}));
+
+jest.mock('~/components/GitLink/GitRepoLink', () => {
+  return ({ url, revision }: { url: string; revision?: string }) => (
+    <span data-test="git-repo-link">
+      {url} ({revision})
+    </span>
+  );
+});
+
+jest.mock('~/components/Components/ComponentDetails/tabs/ComponentLatestBuild', () => {
+  return ({
+    component,
+    version,
+  }: {
+    component: { metadata: { name: string } };
+    version?: string;
+  }) => (
+    <div data-test="latest-build-section">
+      LatestBuild: {component.metadata.name} / {version ?? 'none'}
+    </div>
+  );
+});
+
+jest.mock('~/components/DetailsPage', () => ({
+  DetailsSection: ({ title, children }: { title: string; children: React.ReactNode }) => (
+    <div data-test={`details-section-${title}`}>
+      <h4>{title}</h4>
+      {children}
+    </div>
+  ),
+}));
+
+const useParamsMock = useParams as jest.Mock;
+const useComponentMock = useComponent as jest.Mock;
+
+const mockComponent: Partial<ComponentKind> = {
+  metadata: {
+    name: 'my-component',
+    namespace: 'test-ns',
+    uid: 'uid-1',
+    creationTimestamp: '2024-01-01T00:00:00Z',
+  },
+  spec: {
+    componentName: 'my-component',
+    application: 'my-app',
+    source: {
+      url: 'https://github.com/org/repo',
+      versions: [
+        {
+          name: 'Version 1.0',
+          revision: 'ver-1.0',
+          context: './frontend',
+          'build-pipeline': {
+            pull: { 'pipelineref-by-name': 'version-pipeline' },
+          },
+        },
+        { name: 'Main', revision: 'main' },
+      ],
+    },
+    'default-build-pipeline': {
+      push: { 'pipelineref-by-name': 'default-pipeline' },
+    },
+    containerImage: 'quay.io/org/repo',
+  } as ComponentSpecs,
+};
+
+describe('ComponentVersionOverviewTab', () => {
+  mockUseNamespaceHook('test-ns');
+
+  beforeEach(() => {
+    useParamsMock.mockReturnValue({
+      componentName: 'my-component',
+      versionRevision: 'ver-1.0',
+    });
+    useComponentMock.mockReturnValue([mockComponent, true, undefined]);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should render a spinner while loading', () => {
+    useComponentMock.mockReturnValue([undefined, false, undefined]);
+    renderWithQueryClientAndRouter(<ComponentVersionOverviewTab />);
+    expect(screen.getByTestId('spinner')).toBeInTheDocument();
+  });
+
+  it('should render error state when component fails to load', () => {
+    useComponentMock.mockReturnValue([undefined, true, { code: 500 }]);
+    renderWithQueryClientAndRouter(<ComponentVersionOverviewTab />);
+    expect(screen.getByText('Unable to load Component version')).toBeInTheDocument();
+  });
+
+  it('should render 404 when version is not found', () => {
+    useParamsMock.mockReturnValue({
+      componentName: 'my-component',
+      versionRevision: 'nonexistent',
+    });
+    renderWithQueryClientAndRouter(<ComponentVersionOverviewTab />);
+    expect(screen.getByText('404: Page not found')).toBeInTheDocument();
+  });
+
+  it('should render version name', () => {
+    renderWithQueryClientAndRouter(<ComponentVersionOverviewTab />);
+    expect(screen.getByTestId('version-name')).toHaveTextContent('Version 1.0');
+  });
+
+  it('should render GitRepoLink when repo URL is available', () => {
+    renderWithQueryClientAndRouter(<ComponentVersionOverviewTab />);
+    expect(screen.getByTestId('git-repo-link')).toHaveTextContent(
+      'https://github.com/org/repo (ver-1.0)',
+    );
+  });
+
+  it('should render revision as plain text when repo URL is missing', () => {
+    const componentNoUrl = {
+      ...mockComponent,
+      spec: {
+        ...mockComponent.spec,
+        source: {
+          versions: mockComponent.spec?.source?.versions,
+        },
+      },
+    };
+    useComponentMock.mockReturnValue([componentNoUrl, true, undefined]);
+    renderWithQueryClientAndRouter(<ComponentVersionOverviewTab />);
+    expect(screen.getByTestId('version-branch')).toHaveTextContent('ver-1.0');
+    expect(screen.queryByTestId('git-repo-link')).not.toBeInTheDocument();
+  });
+
+  it('should render pipeline name from version build-pipeline', () => {
+    renderWithQueryClientAndRouter(<ComponentVersionOverviewTab />);
+    expect(screen.getByTestId('version-pipeline')).toHaveTextContent('version-pipeline');
+  });
+
+  it('should fall back to default-build-pipeline when version has none', () => {
+    useParamsMock.mockReturnValue({
+      componentName: 'my-component',
+      versionRevision: 'main',
+    });
+    renderWithQueryClientAndRouter(<ComponentVersionOverviewTab />);
+    expect(screen.getByTestId('version-pipeline')).toHaveTextContent('default-pipeline');
+  });
+
+  it('should render "-" when no pipeline is configured', () => {
+    const componentNoPipeline = {
+      ...mockComponent,
+      spec: {
+        ...mockComponent.spec,
+        'default-build-pipeline': undefined,
+        source: {
+          url: 'https://github.com/org/repo',
+          versions: [{ name: 'No Pipeline', revision: 'no-pipeline' }],
+        },
+      },
+    };
+    useComponentMock.mockReturnValue([componentNoPipeline, true, undefined]);
+    useParamsMock.mockReturnValue({
+      componentName: 'my-component',
+      versionRevision: 'no-pipeline',
+    });
+    renderWithQueryClientAndRouter(<ComponentVersionOverviewTab />);
+    expect(screen.getByTestId('version-pipeline')).toHaveTextContent('-');
+  });
+
+  it('should render the Latest Build section with component and version', () => {
+    renderWithQueryClientAndRouter(<ComponentVersionOverviewTab />);
+    const latestBuild = screen.getByTestId('latest-build-section');
+    expect(latestBuild).toHaveTextContent('LatestBuild: my-component / ver-1.0');
+  });
+
+  it('should render the Version details section title', () => {
+    renderWithQueryClientAndRouter(<ComponentVersionOverviewTab />);
+    expect(screen.getByText('Version details')).toBeInTheDocument();
+  });
+});
