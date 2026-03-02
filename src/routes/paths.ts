@@ -33,6 +33,8 @@ export const COMPONENTS_PATH = WORKSPACE_PATH.extend('components');
 
 export const COMPONENT_DETAILS_V2_PATH = COMPONENTS_PATH.extend(`:${RouterParams.componentName}`);
 
+export const COMPONENT_ACTIVITY_V2_PATH = COMPONENT_DETAILS_V2_PATH.extend('activity');
+
 /**
  * @deprecated Use COMPONENTS_PATH instead
  */
@@ -42,6 +44,12 @@ export const COMPONENT_LIST_PATH = APPLICATION_DETAILS_PATH.extend('components')
  * @deprecated Use COMPONENT_DETAILS_V2_PATH instead
  */
 export const COMPONENT_DETAILS_PATH = COMPONENT_LIST_PATH.extend(`:${RouterParams.componentName}`);
+
+export const COMPONENT_VERSIONS_PATH = COMPONENT_DETAILS_PATH.extend('versions');
+
+export const COMPONENT_VERSION_DETAILS_PATH = COMPONENT_DETAILS_PATH.extend('versions').extend(
+  `:${RouterParams.versionRevision}`,
+);
 
 export const COMPONENT_LINKED_SECRETS_PATH = COMPONENT_DETAILS_PATH.extend(`linked-secrets`);
 

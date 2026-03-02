@@ -21,6 +21,7 @@ export type ComponentSource = {
     revision?: string;
     context?: string;
   };
+  versions?: { name: string; revision: string; context?: string }[];
 };
 
 export enum NudgeStats {

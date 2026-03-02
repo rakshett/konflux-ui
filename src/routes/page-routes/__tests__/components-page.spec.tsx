@@ -4,6 +4,7 @@ import {
   ComponentDetailsViewLayout,
 } from '../../../components/ComponentsPage/ComponentDetails';
 import { COMPONENT_DETAILS_V2_PATH, COMPONENTS_PATH } from '../../paths';
+import { RouterParams } from '../../utils';
 import componentsPageRoutes from '../components-page';
 
 type BaseRoute = {
@@ -55,17 +56,26 @@ describe('Components page routes configuration', () => {
     expect(detailsRoute.children).toBeDefined();
   });
 
-  it('should include index and placeholder child routes', () => {
+  it('should include index, activity, and versions child routes', () => {
     const [, detailsRoute] = componentsPageRoutes as [{ path: string }, PathRoute];
-    const [indexRoute, activityRoute, versionsRoute] = detailsRoute.children;
+    const children = detailsRoute.children ?? [];
 
-    expect(indexRoute.index).toBe(true);
-    expect(indexRoute.element).toEqual(<ComponentDetailsTab />);
+    const indexRoute = children.find((r) => 'index' in r && r.index);
+    expect(indexRoute).toBeDefined();
+    expect(indexRoute?.element).toEqual(<ComponentDetailsTab />);
 
-    expect(activityRoute.path).toBe('activity');
-    expect(activityRoute.element).toBeNull();
+    const activityRoute = children.find((r) => 'path' in r && r.path === 'activity');
+    expect(activityRoute).toBeDefined();
+    expect(activityRoute?.element).not.toBeNull();
 
-    expect(versionsRoute.path).toBe('versions');
-    expect(versionsRoute.element).toBeNull();
+    const activityTabRoute = children.find(
+      (r) => 'path' in r && r.path === `activity/:${RouterParams.activityTab}`,
+    );
+    expect(activityTabRoute).toBeDefined();
+    expect(activityTabRoute?.element).not.toBeNull();
+
+    const versionsRoute = children.find((r) => 'path' in r && r.path === 'versions');
+    expect(versionsRoute).toBeDefined();
+    expect(versionsRoute?.element).toBeNull();
   });
 });

@@ -8,7 +8,7 @@ import {
 } from '@patternfly/react-core/deprecated';
 import { FilterIcon } from '@patternfly/react-icons/dist/esm/icons/filter-icon';
 
-export const MENU_DIVIDER = "--divider--";
+export const MENU_DIVIDER = '--divider--';
 
 type MultiSelectProps = {
   label: string;
@@ -19,6 +19,7 @@ type MultiSelectProps = {
   values: string[];
   setValues: (filters: string[]) => void;
   options: { [key: string]: number };
+  optionLabels?: Record<string, string>;
 };
 
 export const MultiSelect = ({
@@ -30,6 +31,7 @@ export const MultiSelect = ({
   values,
   setValues,
   options,
+  optionLabels,
 }: MultiSelectProps) => {
   const [expanded, setExpanded] = useState(defaultExpanded ?? false);
 
@@ -74,7 +76,7 @@ export const MultiSelect = ({
                   isChecked={values.includes(filter)}
                   itemCount={options[filter] ?? 0}
                 >
-                  {filter}
+                  {optionLabels?.[filter] ?? filter}
                 </SelectOption>
               ),
             )}
