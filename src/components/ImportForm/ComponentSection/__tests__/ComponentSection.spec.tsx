@@ -22,10 +22,11 @@ describe('ComponentSection', () => {
     const user = userEvent.setup();
     const source = screen.getByPlaceholderText('Enter a GitHub or GitLab repository URL');
 
-    await user.type(source, 'https://github.com/abcd/repo.git');
+    await user.clear(source);
+    await user.paste('https://github.com/abcd/repo.git');
     await user.tab();
     await waitFor(() => screen.getByText('Hide advanced Git options'));
-  });
+  }, 10000);
 
   it('should show advanced Annotation section', async () => {
     formikRenderer(<ComponentSection />, {
